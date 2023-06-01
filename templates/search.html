@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>K-전국투어</title>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link
+          rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}"
+        />
+        
+    </head>
+    <body>
+        <div id="wrap">
+            <header>
+                <div>
+                    <h1 class="logo">
+                        <a href=""><img src="{{url_for('static', filename='img/korea.png')}}"></a>
+                    </h1>
+                    <div class= "main_text">
+                        <strong>K-관광 투어 지도</strong>
+                    </div>
+                    
+                </div>
+            </header>
+            <div id="container">
+                <form id ="fi" method="post" action="/">
+                    <select class = "sel" name = "con">
+                    <option>숙소</option>
+                    <option>식당</option>
+                    <option>축제</option>
+                    <option>놀거리</option>
+                    </select>
+                    <input type = "text" placeholder="검색내용을 입력하세요" name = "area">
+                    <input type = "submit" value="검색" >
+                </form>
+                <div id="text" style="overflow:auto">
+                    <span class ="txt"><b>검색 리스트</b></span>
+                </div>
+                <li class = "search" style="overflow:auto">
+                    <div class = "cont">
+                        {% for i in search %}
+                        <div class="card-text1">{{ i }}</div>
+                        {% endfor %}
+                        {% for i in resultv %}
+                        <div class= "hide1" style="display:none">{{ i }}</div>
+                        {% endfor %}
+                    </div>
+                </li>
+
+            
+            <div id="map" ></div>
+            <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=uvm9pp5dd2&submodules=geocoder&callback=initMap"></script> 
+            <script type="text/javascript">
+                    var map = null;
+     
+                    var map = new naver.maps.Map('map', {
+                        center: new naver.maps.LatLng(37.3595704, 127.105399), //지도의 초기 중심 좌표
+                        zoom: 14, //지도의 초기 줌 레벨
+                        minZoom: 7, //지도의 최소 줌 레벨
+                        zoomControl: true, //줌 컨트롤의 표시 여부
+                        zoomControlOptions: { //줌 컨트롤의 옵션
+                        position: naver.maps.Position.TOP_RIGHT
+                        }
+                    });
+                    map.setOptions("tileTransition", true);
+
+                    
+                    
+     
+      
+                    
+                    //검색한 주소의 정보를 insertAddress 함수로 넘겨준다.
+                    function searchAddressToCoordinate(address) {
+                        naver.maps.Service.geocode({
+                            query: address
+                        }, function(status, response) {
+                            if (status === naver.maps.Service.Status.ERROR) {
+                                return alert('Something Wrong!');
+                            }
+                            if (response.v2.meta.totalCount === 0) {
+                                return alert('올바른 주소를 입력해주세요.');
+                            }
+                            var htmlAddresses = [],
+                                item = response.v2.addresses[0],
+                                point = new naver.maps.Point(item.x, item.y);
+    
+    
+                            insertAddress(item.roadAddress, item.x, item.y);
+                            
+                        });
+                    }
+                                
+                    //검색정보를 테이블로 작성해주고, 지도에 마커를 찍어준다.
+                    function insertAddress(address, latitude, longitude) {
+
+                        var map = new naver.maps.Map('map', {
+                            center: new naver.maps.LatLng(longitude, latitude),
+                            zoom: 18
+                        });
+                        var marker = new naver.maps.Marker({
+                            map: map,
+                            position: new naver.maps.LatLng(longitude, latitude),
+                        });
+
+
+                        var contentString = [
+                            '<div class="iw_inner">',
+                            '   <h3>서울특별시청</h3>',
+                            '   <p>서울특별시 중구 태평로1가 31 | 서울특별시 중구 세종대로 110 서울특별시청<br />',
+                            '       02-120 | 공공,사회기관 &gt; 특별,광역시청<br />',
+                            '       <a href="http://www.seoul.go.kr" target="_blank">www.seoul.go.kr/</a>',
+                            '   </p>',
+                            '</div>'
+                        ].join('');
+
+                        var infowindow = new naver.maps.InfoWindow({
+                            content: contentString,
+                            maxWidth: 200,
+                            backgroundColor: "#eee",
+                            borderColor: "#2db400",
+                            borderWidth: 5,
+                            anchorSize: new naver.maps.Size(30, 30),
+                            anchorSkew: true,
+                            anchorColor: "#eee",
+                            pixelOffset: new naver.maps.Point(20, -20)
+                        });
+
+                        naver.maps.Event.addListener(marker, "click", function(e) {
+                            if (infowindow.getMap()) {
+                                infowindow.close();
+                            } else {
+                                infowindow.open(map, marker);
+                            }
+                        });
+                    }
+
+                    // 지도를 이동하게 해주는 함수
+                    function moveMap(len, lat) {
+                        var mapOptions = {
+                                center: new naver.maps.LatLng(len, lat),
+                                zoom: 18,
+                                mapTypeControl: true
+                            };
+                        var map = new naver.maps.Map('map', mapOptions);
+                        var marker = new naver.maps.Marker({
+                            position: new naver.maps.LatLng(len, lat),
+                            map: map
+                        });
+                    }
+                    function createClickHandler(test) {
+                        return function() {
+                            searchAddressToCoordinate(test);
+                        };
+                    }
+                    
+    
+                    var cardTextElements = document.getElementsByClassName("card-text1");
+
+                    var LocalElements = document.getElementsByClassName("hide1");
+
+                    
+                    
+                    // card-text 클래스를 가진 모든 요소에 클릭 이벤트 리스너를 추가합니다.
+                    for (var i = 0; i < cardTextElements.length; i++) {
+                        var test = LocalElements[i].innerText;
+                        cardTextElements[i].addEventListener("click", createClickHandler(test));
+                        };
+                        
+                        
+                </script>
+            </div>
+            
+        </div>
+    </body>
+</html>
