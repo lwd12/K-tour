@@ -13,7 +13,7 @@ A website that enables searching and provides information about traditional Kore
 <img src="/search.png" width="70%" height="40%" title="px(픽셀) 크기 설정" alt="login"></img></br>
 
 
-Integrate Naver's popular list and search system where clicking on a name leads to the map API and marker creation.
+* Integrate Naver's popular list and search system where clicking on a name leads to the map API and marker creation.
 ```python
 filename1 = "tour_craft.csv" # 파일 이름
 acc = []
@@ -159,7 +159,7 @@ def index():
 <img src="/marker-1.png" width="30%" height="30%" title="px(픽셀) 크기 설정" alt="shadow"></img></br>
 
 
-Retrieve local information when a marker is clicked.
+* Retrieve local information when a marker is clicked.
 ```python
     //검색정보를 테이블로 작성해주고, 지도에 마커를 찍어준다.
                     function insertAddress(address, latitude, longitude) {
